@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0c0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CloseTrack">
+<title>CloseTrack AI</title>
+<link rel="manifest" href="/closetrack/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0a1a;
+  --bg2: #110f22;
+  --bg3: #17142e;
+  --bg4: #1e1a3a;
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+  --violet: #8b5cf6;
+  --violet2: #a78bfa;
+  --violet-dim: rgba(139,92,246,.12);
+  --text: #f1f0ff;
+  --text2: #9490b8;
+  --text3: #4d4870;
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,.1);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,.1);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,.1);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,.1);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --font-d: 'Fraunces', Georgia, serif;
+  --font-b: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-b); background: var(--bg); color: var(--text); min-height: 100dvh; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 99px; }
+
+/* ── GATE ── */
+#gate { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+.gate-wrap { max-width: 420px; width: 100%; text-align: center; }
+.gate-logo { font-family: var(--font-d); font-size: 38px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.gate-logo span { color: var(--violet2); font-style: italic; }
+.gate-tag { font-size: 14px; color: var(--text2); margin-bottom: 36px; }
+.gate-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-xl); padding: 36px; }
+.gate-card h2 { font-size: 18px; font-weight: 500; margin-bottom: 20px; }
+.gate-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.gi { flex:1; padding:11px 14px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius); color:var(--text); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .15s; letter-spacing:.05em; }
+.gi:focus { border-color: var(--violet); }
+.gi::placeholder { color:var(--text3); letter-spacing:0; }
+.btn-v { padding:11px 20px; background:var(--violet); color:#fff; border:none; border-radius:var(--radius); font-family:var(--font-b); font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.btn-v:hover { background:var(--violet2); }
+.btn-v:disabled { opacity:.5; cursor:not-allowed; }
+.gate-err { font-size:12px; color:var(--red); margin-bottom:14px; display:none; }
+.gate-demo { font-size:12px; color:var(--text3); margin-top:18px; }
+.gate-demo code { background:var(--bg3); border:1px solid var(--border); padding:2px 7px; border-radius:4px; color:var(--violet2); font-size:11px; }
+.gate-link { font-size:13px; color:var(--text2); margin-top:14px; }
+.gate-link a { color:var(--violet2); text-decoration:none; }
+
+/* ── APP LAYOUT ── */
+#app { display:none; }
+.layout { display:flex; min-height:100dvh; }
+
+/* ── SIDEBAR ── */
+.sb { width:220px; flex-shrink:0; background:var(--bg2); border-right:1px solid var(--border); padding:calc(var(--safe-top)+20px) 0 calc(var(--safe-bottom)+20px); display:flex; flex-direction:column; position:sticky; top:0; height:100dvh; }
+.sb-logo { font-family:var(--font-d); font-size:21px; font-weight:600; color:var(--text); padding:0 20px 22px; border-bottom:1px solid var(--border); }
+.sb-logo span { color:var(--violet2); font-style:italic; }
+.sb-nav { flex:1; padding:14px 10px; }
+.sbi { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); font-size:13px; color:var(--text2); cursor:pointer; transition:all .15s; margin-bottom:2px; border:none; background:none; width:100%; text-align:left; font-family:var(--font-b); }
+.sbi:hover { background:var(--bg3); color:var(--text); }
+.sbi.active { background:var(--violet-dim); color:var(--violet2); }
+.sbi-icon { width:18px; flex-shrink:0; font-size:14px; }
+.sb-foot { padding:14px 20px; border-top:1px solid var(--border); font-size:12px; color:var(--text3); }
+.sb-foot strong { display:block; color:var(--text2); font-size:13px; margin-bottom:2px; }
+
+/* ── MAIN ── */
+.main { flex:1; min-width:0; padding:calc(var(--safe-top)+24px) 28px calc(var(--safe-bottom)+28px); overflow-y:auto; }
+.page { display:none; }
+.page.active { display:block; }
+.pg-title { font-family:var(--font-d); font-size:28px; font-weight:600; color:var(--text); margin-bottom:6px; }
+.pg-sub { font-size:14px; color:var(--text2); margin-bottom:26px; }
+
+/* ── MOBILE NAV ── */
+.mob-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:var(--bg2); border-top:1px solid var(--border); padding:8px 0 calc(var(--safe-bottom)+8px); z-index:100; }
+.mob-nav-inner { display:flex; justify-content:space-around; }
+.mbi { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 10px; font-size:10px; color:var(--text3); cursor:pointer; background:none; border:none; font-family:var(--font-b); transition:color .15s; }
+.mbi.active { color:var(--violet2); }
+.mbi-icon { font-size:19px; }
+@media (max-width:700px) { .sb { display:none; } .mob-nav { display:block; } .main { padding:20px 16px calc(var(--safe-bottom)+80px); } }
+
+/* ── CARD ── */
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; margin-bottom:14px; }
+.card-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:14px; }
+
+/* ── GRID ── */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media (max-width:900px) { .g3,.g4 { grid-template-columns:1fr 1fr; } }
+@media (max-width:600px) { .g2,.g3,.g4 { grid-template-columns:1fr; } }
+
+/* ── STAT CARDS ── */
+.stat { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; }
+.stat-lbl { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; margin-bottom:7px; }
+.stat-val { font-family:var(--font-d); font-size:30px; font-weight:600; color:var(--text); line-height:1; margin-bottom:4px; }
+.stat-sub { font-size:12px; color:var(--text3); }
+.stat-v .stat-val { color:var(--violet2); }
+.stat-g .stat-val { color:var(--green); }
+.stat-a .stat-val { color:var(--amber); }
+
+/* ── FORM ── */
+.f { margin-bottom:13px; }
+.f label { display:block; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; margin-bottom:5px; }
+.f input,.f textarea,.f select { width:100%; padding:9px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .15s; }
+.f input:focus,.f textarea:focus,.f select:focus { border-color:var(--violet); }
+.f input::placeholder,.f textarea::placeholder { color:var(--text3); }
+.f textarea { resize:vertical; min-height:80px; }
+.f select option { background:var(--bg3); }
+.fr2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.fr3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+/* ── BUTTONS ── */
+.btn { padding:9px 18px; border-radius:var(--radius); font-family:var(--font-b); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:6px; }
+.btn-p { background:var(--violet); color:#fff; border:none; }
+.btn-p:hover { background:var(--violet2); }
+.btn-p:disabled { opacity:.5; cursor:not-allowed; }
+.btn-s { background:var(--bg3); color:var(--text2); border:1px solid var(--border2); }
+.btn-s:hover { border-color:var(--violet); color:var(--violet2); }
+.btn-full { width:100%; justify-content:center; padding:11px; font-size:14px; margin-top:14px; }
+
+/* ── DEAL CARDS (WAR ROOM) ── */
+.deal-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; margin-bottom:10px; cursor:pointer; transition:border-color .15s; }
+.deal-card:hover { border-color:rgba(139,92,246,.3); }
+.deal-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.deal-addr { font-size:14px; font-weight:600; color:var(--text); }
+.deal-meta { font-size:12px; color:var(--text3); }
+.deal-stage { font-size:10px; font-weight:600; padding:3px 9px; border-radius:99px; text-transform:uppercase; letter-spacing:.06em; }
+.stage-active { background:var(--green-dim); color:var(--green); }
+.stage-contingency { background:var(--amber-dim); color:var(--amber); }
+.stage-closing { background:var(--violet-dim); color:var(--violet2); }
+.stage-closed { background:var(--bg3); color:var(--text3); border:1px solid var(--border); }
+.deal-progress { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.dp-bar { flex:1; height:4px; background:var(--bg3); border-radius:99px; overflow:hidden; }
+.dp-fill { height:100%; border-radius:99px; background:var(--violet); }
+.dp-pct { font-size:11px; color:var(--text3); flex-shrink:0; }
+.deal-alerts { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.deal-alert { font-size:10px; padding:2px 8px; border-radius:99px; }
+.da-red { background:var(--red-dim); color:var(--red); }
+.da-amber { background:var(--amber-dim); color:var(--amber); }
+.da-blue { background:var(--blue-dim); color:var(--blue); }
+
+/* ── TIMELINE VIEW ── */
+.timeline-item { display:flex; gap:14px; padding:12px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+.timeline-item:last-child { border-bottom:none; }
+.tl-dot-wrap { display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:20px; padding-top:3px; }
+.tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.tl-line { width:1px; flex:1; min-height:16px; margin-top:4px; }
+.dot-critical { background:var(--red); }
+.dot-important { background:var(--amber); }
+.dot-standard { background:var(--violet); }
+.dot-done { background:var(--green); }
+.dot-overdue { background:var(--red); animation:pulse 1.5s infinite; }
+.line-c { background:rgba(248,113,113,.2); }
+.line-i { background:rgba(251,191,36,.2); }
+.line-s { background:rgba(139,92,246,.2); }
+.line-d { background:rgba(52,211,153,.2); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+.tl-date { font-size:11px; color:var(--text3); flex-shrink:0; width:72px; }
+.tl-body { flex:1; }
+.tl-title { font-size:13px; font-weight:500; color:var(--text); margin-bottom:2px; }
+.tl-desc { font-size:12px; color:var(--text2); }
+.tl-resp { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+.resp-tag { font-size:10px; padding:2px 7px; border-radius:99px; background:var(--bg3); color:var(--text3); border:1px solid var(--border); }
+.priority-badge { font-size:10px; padding:2px 7px; border-radius:99px; font-weight:500; flex-shrink:0; align-self:flex-start; }
+.pb-c { background:var(--red-dim); color:var(--red); }
+.pb-i { background:var(--amber-dim); color:var(--amber); }
+.pb-s { background:var(--violet-dim); color:var(--violet2); }
+.tl-check { width:18px; height:18px; border-radius:4px; border:1px solid var(--border2); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; margin-top:2px; }
+.tl-check:hover { border-color:var(--green); }
+.tl-check.done { background:var(--green); border-color:var(--green); }
+.tl-check.done::after { content:'✓'; font-size:11px; color:#0c0a1a; font-weight:700; }
+
+/* ── COMMUNICATION ── */
+.comm-types { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px; }
+@media (max-width:600px) { .comm-types { grid-template-columns:1fr 1fr; } }
+.ct-btn { padding:10px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); font-family:var(--font-b); font-size:11px; color:var(--text2); cursor:pointer; text-align:left; transition:all .15s; }
+.ct-btn:hover { border-color:rgba(139,92,246,.4); color:var(--violet2); }
+.ct-btn.active { background:var(--violet-dim); border-color:rgba(139,92,246,.4); color:var(--violet2); }
+.ct-icon { font-size:18px; display:block; margin-bottom:4px; }
+.ct-name { font-weight:500; display:block; }
+.copy-block { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-size:13px; color:var(--text2); line-height:1.7; white-space:pre-wrap; position:relative; }
+.copy-btn { position:absolute; top:8px; right:8px; padding:4px 10px; border-radius:var(--radius); background:var(--bg4); border:1px solid var(--border); color:var(--text3); font-size:11px; cursor:pointer; font-family:var(--font-b); transition:all .15s; }
+.copy-btn:hover { color:var(--violet2); border-color:var(--violet); }
+.email-subj { display:block; font-size:12px; color:var(--text3); padding-bottom:10px; margin-bottom:10px; border-bottom:1px solid var(--border); }
+
+/* ── CONTRACT REVIEW ── */
+.flag-item { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:13px; align-items:flex-start; }
+.flag-item:last-child { border-bottom:none; }
+.fi-icon { flex-shrink:0; margin-top:1px; font-size:14px; }
+.fi-title { font-weight:500; color:var(--text); display:block; margin-bottom:2px; }
+.fi-detail { color:var(--text2); font-size:12px; line-height:1.4; }
+.fi-action { color:var(--violet2); font-size:11px; margin-top:3px; }
+.term-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+@media (max-width:600px) { .term-grid { grid-template-columns:1fr; } }
+.term-item { background:var(--bg3); border-radius:var(--radius); padding:10px 12px; }
+.term-lbl { font-size:11px; color:var(--text3); margin-bottom:3px; }
+.term-val { font-size:14px; font-weight:500; color:var(--text); }
+
+/* ── ALERT PANEL ── */
+.alert-row { display:flex; gap:12px; padding:12px; border-radius:var(--radius); margin-bottom:8px; align-items:flex-start; }
+.ar-overdue { background:var(--red-dim); border:1px solid rgba(248,113,113,.2); }
+.ar-today { background:var(--amber-dim); border:1px solid rgba(251,191,36,.2); }
+.ar-48 { background:var(--blue-dim); border:1px solid rgba(96,165,250,.2); }
+.ar-7 { background:var(--bg3); border:1px solid var(--border); }
+.ar-icon { font-size:18px; flex-shrink:0; }
+.ar-body { flex:1; }
+.ar-title { font-size:13px; font-weight:600; margin-bottom:3px; }
+.ar-action { font-size:12px; margin-bottom:2px; }
+.ar-meta { font-size:11px; color:var(--text3); }
+
+/* ── CHAT ── */
+.chat-wrap { display:flex; flex-direction:column; height:calc(100dvh - 200px); min-height:360px; }
+.chat-msgs { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:16px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
+.bbl { max-width:82%; }
+.bbl-u { align-self:flex-end; }
+.bbl-ai { align-self:flex-start; }
+.bbl-c { padding:12px 15px; border-radius:var(--radius-lg); font-size:14px; line-height:1.6; }
+.bbl-u .bbl-c { background:var(--violet); color:#fff; border-radius:var(--radius-lg) var(--radius-lg) 4px var(--radius-lg); }
+.bbl-ai .bbl-c { background:var(--bg3); color:var(--text); border:1px solid var(--border); border-radius:var(--radius-lg) var(--radius-lg) var(--radius-lg) 4px; white-space:pre-wrap; }
+.bbl-m { font-size:11px; color:var(--text3); margin-top:4px; padding:0 4px; }
+.bbl-u .bbl-m { text-align:right; }
+.typing span { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--text3); margin:0 2px; animation:tp .8s ease-in-out infinite; }
+.typing span:nth-child(2){animation-delay:.15s} .typing span:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chat-input-row { display:flex; gap:8px; padding:10px; background:var(--bg3); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--radius-lg) var(--radius-lg); }
+.chat-in { flex:1; padding:9px 13px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .15s; resize:none; max-height:100px; }
+.chat-in:focus { border-color:var(--violet); }
+.chat-in::placeholder { color:var(--text3); }
+.quick-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.qc { padding:5px 12px; border-radius:99px; background:var(--bg3); border:1px solid var(--border2); font-size:12px; color:var(--text2); cursor:pointer; transition:all .15s; font-family:var(--font-b); }
+.qc:hover { border-color:var(--violet); color:var(--violet2); }
+
+/* ── UTILS ── */
+.spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,.15); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row { display:flex; align-items:center; gap:12px; padding:18px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); font-size:14px; color:var(--text2); }
+.err-row { padding:16px; background:var(--red-dim); border:1px solid rgba(248,113,113,.2); border-radius:var(--radius-lg); font-size:13px; color:var(--red); }
+#offline { background:var(--amber-dim); border:1px solid rgba(251,191,36,.2); border-radius:var(--radius); padding:9px 14px; font-size:12px; color:var(--amber); margin-bottom:14px; display:none; }
+.add-deal-btn { width:100%; padding:14px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-lg); color:var(--text2); font-family:var(--font-b); font-size:14px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px; }
+.add-deal-btn:hover { border-color:var(--violet); color:var(--violet2); }
+.section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.section-lbl { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; }
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-wrap">
+    <div class="gate-logo">Close<span>Track</span></div>
+    <div class="gate-tag">From contract to keys. Nothing falls through.</div>
+    <div class="gate-card">
+      <h2>Activate CloseTrack AI</h2>
+      <div class="gate-row">
+        <input class="gi" type="text" id="key-in" placeholder="CT-XXXX-XXXXXXXX" autocapitalize="characters" spellcheck="false" autocomplete="off">
+        <button class="btn-v" id="act-btn" onclick="activateKey()">Activate</button>
+      </div>
+      <div class="gate-err" id="gate-err">Invalid key. Check your purchase confirmation email.</div>
+      <p class="gate-link">No key? <a href="https://sikariam.gumroad.com" target="_blank">Get CloseTrack AI →</a></p>
+      <p class="gate-demo">Demo: <code>CT-DEMO-00000000</code></p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+    <nav class="sb">
+      <div class="sb-logo">Close<span>Track</span></div>
+      <div class="sb-nav">
+        <button class="sbi active" onclick="pg('warroom')"><span class="sbi-icon">⊞</span> War Room</button>
+        <button class="sbi" onclick="pg('timeline')"><span class="sbi-icon">📅</span> Timeline</button>
+        <button class="sbi" onclick="pg('comms')"><span class="sbi-icon">✉</span> Communications</button>
+        <button class="sbi" onclick="pg('contract')"><span class="sbi-icon">📄</span> Contract Review</button>
+        <button class="sbi" onclick="pg('alerts')"><span class="sbi-icon">🔔</span> Deadline Alerts</button>
+        <button class="sbi" onclick="pg('assistant')"><span class="sbi-icon">✦</span> TC Assistant</button>
+      </div>
+      <div class="sb-foot">
+        <strong id="sb-name">Loading...</strong>
+        <span id="sb-tier"></span>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div id="offline">You are offline. Review saved transactions or use the AI assistant.</div>
+
+      <!-- WAR ROOM -->
+      <div class="page active" id="page-warroom">
+        <div class="pg-title">War Room</div>
+        <div class="pg-sub">All active transactions — deadlines, status, alerts at a glance.</div>
+        <div class="g4" style="margin-bottom:20px">
+          <div class="stat stat-v"><div class="stat-lbl">Active deals</div><div class="stat-val" id="ws-active">0</div><div class="stat-sub">in progress</div></div>
+          <div class="stat stat-a"><div class="stat-lbl">Alerts</div><div class="stat-val" id="ws-alerts">0</div><div class="stat-sub">need attention</div></div>
+          <div class="stat stat-g"><div class="stat-lbl">Closing this week</div><div class="stat-val" id="ws-closing">0</div><div class="stat-sub">transactions</div></div>
+          <div class="stat"><div class="stat-lbl">Avg days to close</div><div class="stat-val" id="ws-avg">—</div><div class="stat-sub">current pipeline</div></div>
+        </div>
+        <button class="add-deal-btn" onclick="pg('timeline')">+ Add new transaction</button>
+        <div class="section-head">
+          <span class="section-lbl">Active transactions</span>
+          <button class="btn btn-s" style="padding:6px 12px;font-size:12px" onclick="loadDeals()">Refresh</button>
+        </div>
+        <div id="deals-list"></div>
+      </div>
+
+      <!-- TIMELINE GENERATOR -->
+      <div class="page" id="page-timeline">
+        <div class="pg-title">Timeline generator</div>
+        <div class="pg-sub">Enter contract details — AI builds your complete contract-to-close milestone calendar.</div>
+        <div class="card">
+          <div class="f"><label>Property address</label><input type="text" id="t-addr" placeholder="742 Maple Ave, Springfield, IL 62701"></div>
+          <div class="fr2">
+            <div class="f"><label>Contract date</label><input type="date" id="t-contract"></div>
+            <div class="f"><label>Target closing date</label><input type="date" id="t-closing"></div>
+          </div>
+          <div class="fr2">
+            <div class="f"><label>Purchase price ($)</label><input type="number" id="t-price" placeholder="425000"></div>
+            <div class="f"><label>Transaction type</label>
+              <select id="t-type">
+                <option>Residential purchase</option>
+                <option>Residential sale (listing)</option>
+                <option>Condo purchase</option>
+                <option>New construction</option>
+                <option>Investment property</option>
+                <option>Short sale</option>
+                <option>REO / foreclosure</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr2">
+            <div class="f"><label>Financing type</label>
+              <select id="t-financing">
+                <option>Conventional loan</option>
+                <option>FHA loan</option>
+                <option>VA loan</option>
+                <option>USDA loan</option>
+                <option>Cash purchase</option>
+                <option>Jumbo loan</option>
+              </select>
+            </div>
+            <div class="f"><label>Inspection period (days)</label><input type="number" id="t-inspect" placeholder="10" value="10"></div>
+          </div>
+          <div class="fr2">
+            <div class="f"><label>Buyer's agent</label><input type="text" id="t-buyer-agent" placeholder="Agent name"></div>
+            <div class="f"><label>Seller's agent</label><input type="text" id="t-seller-agent" placeholder="Agent name"></div>
+          </div>
+          <div class="f"><label>Special conditions or notes</label><textarea id="t-notes" rows="2" placeholder="e.g. seller requests leaseback, as-is sale, HOA addendum required..."></textarea></div>
+          <button class="btn btn-p btn-full" id="t-btn" onclick="genTimeline()">Generate complete timeline →</button>
+        </div>
+        <div id="t-result"></div>
+      </div>
+
+      <!-- COMMUNICATIONS -->
+      <div class="page" id="page-comms">
+        <div class="pg-title">Communications</div>
+        <div class="pg-sub">Generate professional emails and messages for every stage — ready to send in seconds.</div>
+        <div class="comm-types" id="comm-types">
+          <button class="ct-btn active" data-type="welcome_buyer" onclick="selComm(this)"><span class="ct-icon">👋</span><span class="ct-name">Welcome buyer</span></button>
+          <button class="ct-btn" data-type="welcome_seller" onclick="selComm(this)"><span class="ct-icon">🏠</span><span class="ct-name">Welcome seller</span></button>
+          <button class="ct-btn" data-type="inspection_scheduled" onclick="selComm(this)"><span class="ct-icon">🔍</span><span class="ct-name">Inspection scheduled</span></button>
+          <button class="ct-btn" data-type="inspection_results" onclick="selComm(this)"><span class="ct-icon">📋</span><span class="ct-name">Inspection results</span></button>
+          <button class="ct-btn" data-type="appraisal_ordered" onclick="selComm(this)"><span class="ct-icon">📊</span><span class="ct-name">Appraisal ordered</span></button>
+          <button class="ct-btn" data-type="weekly_update" onclick="selComm(this)"><span class="ct-icon">📬</span><span class="ct-name">Weekly update</span></button>
+          <button class="ct-btn" data-type="closing_instructions" onclick="selComm(this)"><span class="ct-icon">🔑</span><span class="ct-name">Closing instructions</span></button>
+          <button class="ct-btn" data-type="closing_complete" onclick="selComm(this)"><span class="ct-icon">🎉</span><span class="ct-name">Closing complete</span></button>
+          <button class="ct-btn" data-type="rent_increase" onclick="selComm(this)"><span class="ct-icon">⚠</span><span class="ct-name">Contingency removal</span></button>
+        </div>
+        <div class="card">
+          <div class="fr2">
+            <div class="f"><label>Property address</label><input type="text" id="c-addr" placeholder="742 Maple Ave"></div>
+            <div class="f"><label>Closing date</label><input type="date" id="c-close"></div>
+          </div>
+          <div class="fr2">
+            <div class="f"><label>Recipient name</label><input type="text" id="c-recipient" placeholder="John & Sarah Smith"></div>
+            <div class="f"><label>Your name</label><input type="text" id="c-agent" placeholder="Your name"></div>
+          </div>
+          <div class="f"><label>Additional context for this message</label><textarea id="c-details" rows="2" placeholder="Inspection is scheduled for Thursday 2pm, inspector is Mike Jones (555-0123)..."></textarea></div>
+          <button class="btn btn-p btn-full" id="c-btn" onclick="genComm()">Generate communication →</button>
+        </div>
+        <div id="c-result"></div>
+      </div>
+
+      <!-- CONTRACT REVIEW -->
+      <div class="page" id="page-contract">
+        <div class="pg-title">Contract review</div>
+        <div class="pg-sub">Paste key contract details for AI-powered term extraction, flag analysis, and recommendations.</div>
+        <div class="card">
+          <div class="fr2" style="margin-bottom:10px">
+            <div class="f"><label>Transaction type</label>
+              <select id="cr-type">
+                <option>Residential purchase agreement</option>
+                <option>Listing agreement</option>
+                <option>Buyer representation agreement</option>
+                <option>Counter offer</option>
+                <option>Addendum / amendment</option>
+                <option>Lease agreement</option>
+              </select>
+            </div>
+          </div>
+          <div class="f"><label>Contract text or key terms to review</label><textarea id="cr-text" rows="8" placeholder="Paste the full contract text, or key terms and clauses you want reviewed. Include all dates, prices, contingencies, and special conditions..."></textarea></div>
+          <button class="btn btn-p btn-full" id="cr-btn" onclick="reviewContract()">Analyze contract →</button>
+        </div>
+        <div id="cr-result"></div>
+      </div>
+
+      <!-- DEADLINE ALERTS -->
+      <div class="page" id="page-alerts">
+        <div class="pg-title">Deadline alerts</div>
+        <div class="pg-sub">Paste your milestone list and AI generates a prioritized alert report with action items.</div>
+        <div class="card">
+          <div class="f"><label>Property address</label><input type="text" id="al-addr" placeholder="742 Maple Ave, Springfield"></div>
+          <div class="f"><label>Paste your milestone list (one per line: "Milestone name — Due date — Status")</label>
+            <textarea id="al-milestones" rows="8" placeholder="Inspection deadline — 2026-04-08 — pending&#10;Appraisal ordered — 2026-04-05 — done&#10;Loan approval — 2026-04-18 — pending&#10;Closing disclosure — 2026-04-22 — pending&#10;Closing — 2026-04-28 — pending"></textarea>
+          </div>
+          <button class="btn btn-p btn-full" id="al-btn" onclick="genAlerts()">Generate alert report →</button>
+        </div>
+        <div id="al-result"></div>
+      </div>
+
+      <!-- TC ASSISTANT -->
+      <div class="page" id="page-assistant">
+        <div class="pg-title">TC Assistant</div>
+        <div class="pg-sub">Ask anything about transaction coordination, deal complications, or closing process.</div>
+        <div class="quick-chips">
+          <button class="qc" onclick="setQ('Appraisal came in $15,000 low. What are my options?')">Low appraisal options</button>
+          <button class="qc" onclick="setQ('Buyer wants to remove inspection contingency early. Should I advise against?')">Early contingency removal</button>
+          <button class="qc" onclick="setQ('Lender says they need 2 more weeks. Closing is in 5 days. What do I do?')">Lender delay crisis</button>
+          <button class="qc" onclick="setQ('Seller is requesting a 2-week leaseback after closing. How do I structure this?')">Leaseback structure</button>
+          <button class="qc" onclick="setQ('Buyer got cold feet the day before closing. What are the legal implications?')">Buyer cold feet</button>
+          <button class="qc" onclick="setQ('What documents should be collected before the final walkthrough?')">Pre-walkthrough checklist</button>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="bbl bbl-ai">
+              <div class="bbl-c">Hi! I'm your CloseTrack TC Assistant. I help with deal complications, contract questions, closing process guidance, and anything else that comes up during the transaction. What's on your plate today?</div>
+              <div class="bbl-m">CloseTrack AI</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-in" id="chat-in" placeholder="Ask anything about the closing process..." rows="1" onkeydown="chatKey(event)"></textarea>
+            <button class="btn-v btn" id="chat-send" onclick="sendChat()" style="align-self:flex-end;padding:9px 16px">Send</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MOBILE NAV -->
+  <nav class="mob-nav">
+    <div class="mob-nav-inner">
+      <button class="mbi active" onclick="pg('warroom')"><span class="mbi-icon">⊞</span>Deals</button>
+      <button class="mbi" onclick="pg('timeline')"><span class="mbi-icon">📅</span>Timeline</button>
+      <button class="mbi" onclick="pg('comms')"><span class="mbi-icon">✉</span>Comms</button>
+      <button class="mbi" onclick="pg('alerts')"><span class="mbi-icon">🔔</span>Alerts</button>
+      <button class="mbi" onclick="pg('assistant')"><span class="mbi-icon">✦</span>AI</button>
+    </div>
+  </nav>
+</div>
+
+<script>
+const API = 'https://closetrack.gridiq.ink'; // Update after deploy
+let key = localStorage.getItem('ct_key') || '';
+let keyData = safeJSON(localStorage.getItem('ct_key_data'));
+let deals = safeJSON(localStorage.getItem('ct_deals')) || [];
+let selectedCommType = 'welcome_buyer';
+
+function safeJSON(s){try{return JSON.parse(s);}catch{return null;}}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt$(n){return n?'$'+Number(n).toLocaleString():'—';}
+function fmtDate(s){if(!s)return'—';try{return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch{return s;}}
+function daysFrom(dateStr){if(!dateStr)return null;const d=new Date(dateStr+'T12:00:00');const now=new Date();return Math.round((d-now)/(86400000));}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (key && keyData) showApp();
+  document.getElementById('key-in').addEventListener('keydown', e => { if(e.key==='Enter') activateKey(); });
+  window.addEventListener('offline',()=>{const b=document.getElementById('offline');if(b)b.style.display='block';});
+  window.addEventListener('online',()=>{const b=document.getElementById('offline');if(b)b.style.display='none';});
+  if(!navigator.onLine){const b=document.getElementById('offline');if(b)b.style.display='block';}
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/closetrack/sw.js').catch(()=>{});
+  const today = new Date().toISOString().split('T')[0];
+  ['t-contract','t-closing','c-close'].forEach(id => { const el = document.getElementById(id); if(el) el.value = today; });
+});
+
+async function activateKey() {
+  const raw = document.getElementById('key-in').value.trim().toUpperCase();
+  const err = document.getElementById('gate-err');
+  const btn = document.getElementById('act-btn');
+  err.style.display='none'; btn.textContent='Checking...'; btn.disabled=true;
+  try {
+    const res = await fetch(`${API}/api/validate-key`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:raw})});
+    const d = await res.json();
+    if(!d.valid) throw new Error('invalid');
+    key = raw; keyData = d;
+    localStorage.setItem('ct_key',raw);
+    localStorage.setItem('ct_key_data',JSON.stringify(d));
+    showApp();
+  } catch(e) {
+    err.textContent = e.message==='invalid' ? 'Invalid key. Check your purchase confirmation email.' : 'Could not connect. Try again.';
+    err.style.display='block'; btn.textContent='Activate'; btn.disabled=false;
+  }
+}
+
+function showApp() {
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('sb-name').textContent = keyData?.name || 'Agent';
+  document.getElementById('sb-tier').textContent = (keyData?.tier || 'agent') + ' plan';
+  loadDeals();
+}
+
+function pg(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sbi,.mbi').forEach(b=>b.classList.remove('active'));
+  const p = document.getElementById(`page-${id}`);
+  if(p) p.classList.add('active');
+  document.querySelectorAll('.sbi,.mbi').forEach(b=>{if(b.getAttribute('onclick')?.includes(`'${id}'`))b.classList.add('active');});
+}
+
+function loadDeals() {
+  const list = document.getElementById('deals-list');
+  if(!list) return;
+  if(!deals.length){
+    list.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px"><div style="font-size:36px;margin-bottom:12px;opacity:.3">📋</div>No active transactions yet.<br>Generate a timeline to add your first deal.</div>`;
+    document.getElementById('ws-active').textContent='0';
+    return;
+  }
+  document.getElementById('ws-active').textContent=deals.filter(d=>d.status!=='closed').length;
+  const alerts=deals.reduce((a,d)=>(d.alerts||0)+a,0);
+  document.getElementById('ws-alerts').textContent=alerts;
+  const thisWeek=deals.filter(d=>{const days=daysFrom(d.closingDate);return days!=null&&days>=0&&days<=7;}).length;
+  document.getElementById('ws-closing').textContent=thisWeek;
+  list.innerHTML = deals.map(d => {
+    const daysToClose = daysFrom(d.closingDate);
+    const pct = d.progress || 0;
+    const stageClass = {active:'stage-active',contingency:'stage-contingency',closing:'stage-closing',closed:'stage-closed'}[d.stage||'active'];
+    const alertBadges = (d.alertList||[]).slice(0,3).map(a=>`<span class="deal-alert da-${a.type||'blue'}">${esc(a.label)}</span>`).join('');
+    return `<div class="deal-card" onclick="viewDeal('${d.id}')">
+      <div class="deal-header">
+        <div>
+          <div class="deal-addr">${esc(d.address)}</div>
+          <div class="deal-meta">${fmt$(d.price)} · Closing ${fmtDate(d.closingDate)}${daysToClose!=null?` (${daysToClose>0?daysToClose+'d':'TODAY!'})`:''}</div>
+        </div>
+        <span class="deal-stage ${stageClass}">${d.stage||'active'}</span>
+      </div>
+      <div class="deal-progress"><div class="dp-bar"><div class="dp-fill" style="width:${pct}%"></div></div><span class="dp-pct">${pct}%</span></div>
+      ${alertBadges?`<div class="deal-alerts">${alertBadges}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function viewDeal(id) {
+  const deal = deals.find(d=>d.id===id);
+  if(!deal) return;
+  document.getElementById('t-addr').value = deal.address || '';
+  document.getElementById('t-contract').value = deal.contractDate || '';
+  document.getElementById('t-closing').value = deal.closingDate || '';
+  document.getElementById('t-price').value = deal.price || '';
+  pg('timeline');
+  if(deal.timeline) renderTimeline(deal.timeline, deal);
+}
+
+// ── TIMELINE ──
+async function genTimeline() {
+  const addr = document.getElementById('t-addr').value.trim();
+  if(!addr){alert('Please enter the property address.');return;}
+  const btn = document.getElementById('t-btn');
+  const result = document.getElementById('t-result');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Building timeline...';
+  result.innerHTML = loading('Generating complete contract-to-close milestone calendar...');
+  try {
+    const res = await fetch(`${API}/api/timeline`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key, transaction:{
+        address:addr,
+        contractDate:document.getElementById('t-contract').value,
+        closingDate:document.getElementById('t-closing').value,
+        purchasePrice:document.getElementById('t-price').value,
+        type:document.getElementById('t-type').value,
+        financing:document.getElementById('t-financing').value,
+        inspectionDays:document.getElementById('t-inspect').value,
+        buyerAgent:document.getElementById('t-buyer-agent').value,
+        sellerAgent:document.getElementById('t-seller-agent').value,
+        notes:document.getElementById('t-notes').value
+      }})
+    });
+    const d = await res.json();
+    renderTimeline(d.result, {address:addr});
+    saveDeal(d.result, addr);
+    loadDeals();
+  } catch(e){ result.innerHTML=errCard(e.message); }
+  btn.disabled=false; btn.textContent='Generate complete timeline →';
+}
+
+function renderTimeline(r, deal) {
+  const result = document.getElementById('t-result');
+  if(!r?.milestones) return;
+  const today = new Date().toISOString().split('T')[0];
+  const byCategory = {};
+  r.milestones.forEach(m => {
+    const cat = m.category || 'other';
+    if(!byCategory[cat]) byCategory[cat]=[];
+    byCategory[cat].push(m);
+  });
+  const catLabels = {inspection:'Inspection',appraisal:'Appraisal',financing:'Financing',title:'Title & Escrow',closing:'Closing',disclosure:'Disclosures',other:'Other'};
+  let html = `<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--text)">${esc(r.transactionSummary?.address||deal?.address||'Transaction')}</div>
+        <div style="font-size:12px;color:var(--text3)">${fmt$(r.transactionSummary?.purchasePrice)} · Contract: ${fmtDate(r.transactionSummary?.contractDate)} · Closing: ${fmtDate(r.transactionSummary?.closingDate)}</div>
+      </div>
+      <button class="btn btn-s" style="padding:6px 14px;font-size:12px" onclick="copyTimeline()">Export</button>
+    </div>`;
+  if(r.criticalPathSummary){html+=`<div style="background:var(--violet-dim);border:1px solid rgba(139,92,246,.2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);margin-bottom:16px">${esc(r.criticalPathSummary)}</div>`;}
+  const cats = Object.keys(byCategory);
+  cats.forEach(cat => {
+    html += `<div style="margin-bottom:4px"><div class="section-lbl" style="margin-bottom:10px;margin-top:16px">${catLabels[cat]||cat}</div>`;
+    byCategory[cat].forEach((m,i) => {
+      const isLast = i === byCategory[cat].length - 1;
+      const overdue = m.dueDate && m.dueDate < today && m.status === 'pending';
+      const dotClass = m.status==='done'?'dot-done':overdue?'dot-overdue':{critical:'dot-critical',important:'dot-important',standard:'dot-standard'}[m.priority]||'dot-standard';
+      const lineClass = {critical:'line-c',important:'line-i',standard:'line-s'}[m.priority]||'line-s';
+      const pbClass = {critical:'pb-c',important:'pb-i',standard:'pb-s'}[m.priority]||'pb-s';
+      const pbLabel = {critical:'Critical',important:'Important',standard:'Standard'}[m.priority]||'';
+      const resp = (m.responsible||[]).map(r=>`<span class="resp-tag">${esc(r.replace(/_/g,' '))}</span>`).join('');
+      html += `<div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot ${dotClass}" id="dot-${m.id}"></div>
+          ${!isLast?`<div class="tl-line ${lineClass}"></div>`:''}
+        </div>
+        <div style="flex-shrink:0;width:80px;font-size:11px;color:var(--text3);line-height:1.3">${fmtDate(m.dueDate)}${overdue?`<br><span style="color:var(--red);font-weight:600">OVERDUE</span>`:''}</div>
+        <div class="tl-body">
+          <div class="tl-title">${esc(m.title)}</div>
+          ${m.description?`<div class="tl-desc">${esc(m.description)}</div>`:''}
+          <div class="tl-resp">${resp}</div>
+        </div>
+        <span class="priority-badge ${pbClass}">${pbLabel}</span>
+        <div class="tl-check ${m.status==='done'?'done':''}" id="check-${m.id}" onclick="toggleCheck('${m.id}',this)"></div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  if(r.risksIdentified?.length){
+    html += `<div style="margin-top:16px"><div class="section-lbl" style="margin-bottom:8px">Risks identified</div>`;
+    r.risksIdentified.forEach(risk=>{html+=`<div style="font-size:13px;color:var(--amber);padding:5px 0;border-bottom:1px solid var(--border)">⚠ ${esc(risk)}</div>`;});
+    html += '</div>';
+  }
+  html += '</div>';
+  result.innerHTML = html;
+  result.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCheck(id, el) {
+  el.classList.toggle('done');
+  const dot = document.getElementById(`dot-${id}`);
+  if(dot) dot.className = `tl-dot ${el.classList.contains('done')?'dot-done':'dot-standard'}`;
+}
+
+function saveDeal(timeline, address) {
+  const id = 'deal-'+Date.now();
+  const ms = timeline.milestones || [];
+  const done = ms.filter(m=>m.status==='done').length;
+  const pct = ms.length ? Math.round((done/ms.length)*100) : 0;
+  const today = new Date().toISOString().split('T')[0];
+  const alertList = ms.filter(m=>m.dueDate && m.dueDate <= today && m.status!=='done' && m.priority==='critical').slice(0,3).map(m=>({label:m.title.substring(0,20),type:'red'}));
+  const deal = {id, address, contractDate:timeline.transactionSummary?.contractDate, closingDate:timeline.transactionSummary?.closingDate, price:timeline.transactionSummary?.purchasePrice, stage:'active', progress:pct, alerts:alertList.length, alertList, timeline};
+  deals.unshift(deal);
+  if(deals.length>20) deals.pop();
+  localStorage.setItem('ct_deals',JSON.stringify(deals));
+}
+
+function copyTimeline() {
+  const result = document.getElementById('t-result');
+  if(!result) return;
+  navigator.clipboard.writeText(result.innerText).then(()=>alert('Timeline copied to clipboard.'));
+}
+
+// ── COMMUNICATIONS ──
+function selComm(btn) {
+  document.querySelectorAll('.ct-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCommType = btn.dataset.type;
+}
+
+async function genComm() {
+  const btn = document.getElementById('c-btn');
+  const result = document.getElementById('c-result');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Drafting...';
+  result.innerHTML = loading('Writing professional communication...');
+  try {
+    const res = await fetch(`${API}/api/communication`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key, type:selectedCommType,
+        transaction:{address:document.getElementById('c-addr').value,closingDate:document.getElementById('c-close').value,agentName:document.getElementById('c-agent').value},
+        recipient:document.getElementById('c-recipient').value,
+        details:document.getElementById('c-details').value
+      })
+    });
+    const d = await res.json();
+    let content = d.content || '';
+    let subjHtml = '';
+    if(content.startsWith('Subject:')){
+      const lines = content.split('\n');
+      subjHtml = `<span class="email-subj">${esc(lines[0])}</span>`;
+      content = lines.slice(2).join('\n').trim();
+    }
+    result.innerHTML = `<div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="section-lbl">${esc(selectedCommType.replace(/_/g,' '))}</div>
+        <button class="btn btn-s" style="padding:6px 12px;font-size:12px" onclick="copyEl('comm-body')">Copy</button>
+      </div>
+      <div class="copy-block" id="comm-body">${subjHtml}${esc(content)}</div>
+    </div>`;
+  } catch(e){ result.innerHTML=errCard(e.message); }
+  btn.disabled=false; btn.textContent='Generate communication →';
+}
+
+// ── CONTRACT REVIEW ──
+async function reviewContract() {
+  const text = document.getElementById('cr-text').value.trim();
+  if(!text){alert('Please paste the contract text to review.');return;}
+  const btn = document.getElementById('cr-btn');
+  const result = document.getElementById('cr-result');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Analyzing...';
+  result.innerHTML = loading('Extracting terms and analyzing contract...');
+  try {
+    const res = await fetch(`${API}/api/contract-review`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key, contractText:text, transactionType:document.getElementById('cr-type').value})
+    });
+    const d = await res.json();
+    const r = d.result;
+    const terms = [
+      {l:'Purchase price',v:fmt$(r.keyTerms?.purchasePrice)},
+      {l:'Earnest money',v:fmt$(r.keyTerms?.earnestMoney)},
+      {l:'Closing date',v:r.keyTerms?.closingDate||'—'},
+      {l:'Possession date',v:r.keyTerms?.possessionDate||'—'},
+      {l:'Inspection period',v:r.keyTerms?.inspectionPeriod||'—'},
+      {l:'Seller concessions',v:fmt$(r.keyTerms?.sellerConcessions)},
+    ];
+    const termsHtml = `<div class="term-grid">${terms.map(t=>`<div class="term-item"><div class="term-lbl">${t.l}</div><div class="term-val">${esc(t.v)}</div></div>`).join('')}</div>`;
+    const flagsHtml = (r.flags||[]).map(f=>{
+      const icon={critical:'🔴',warning:'🟡',info:'🔵'}[f.severity]||'⚪';
+      return `<div class="flag-item"><span class="fi-icon">${icon}</span><div><span class="fi-title">${esc(f.item)}</span><div class="fi-detail">${esc(f.detail)}</div>${f.action?`<div class="fi-action">→ ${esc(f.action)}</div>`:''}</div></div>`;
+    }).join('');
+    const recHtml = (r.recommendedActions||[]).map(a=>`<div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px"><span style="color:var(--violet2);flex-shrink:0">→</span>${esc(a)}</div>`).join('');
+    result.innerHTML = `<div class="card">
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;padding:12px;background:var(--bg3);border-radius:var(--radius)">${esc(r.summary||'')}</div>
+      <div class="section-lbl" style="margin-bottom:10px">Key terms</div>
+      ${termsHtml}
+      ${flagsHtml?`<div class="section-lbl" style="margin:16px 0 10px">Flags &amp; concerns</div>${flagsHtml}`:''}
+      ${recHtml?`<div class="section-lbl" style="margin:16px 0 10px">Recommended actions</div>${recHtml}`:''}
+      ${r.missingItems?.length?`<div class="section-lbl" style="margin:16px 0 8px">Missing items</div>${r.missingItems.map(i=>`<div style="font-size:13px;color:var(--amber);padding:4px 0">⚠ ${esc(i)}</div>`).join('')}`:''}
+    </div>`;
+  } catch(e){ result.innerHTML=errCard(e.message); }
+  btn.disabled=false; btn.textContent='Analyze contract →';
+}
+
+// ── ALERTS ──
+async function genAlerts() {
+  const addr = document.getElementById('al-addr').value.trim();
+  const raw = document.getElementById('al-milestones').value.trim();
+  if(!raw){alert('Please enter your milestone list.');return;}
+  const milestones = raw.split('\n').filter(l=>l.trim()).map((l,i)=>{
+    const parts = l.split('—').map(s=>s.trim());
+    return {id:`m${i}`,title:parts[0]||l,dueDate:parts[1]||'',status:parts[2]||'pending'};
+  });
+  const btn = document.getElementById('al-btn');
+  const result = document.getElementById('al-result');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Analyzing...';
+  result.innerHTML = loading('Scanning deadlines and generating alert report...');
+  try {
+    const res = await fetch(`${API}/api/deadline-alerts`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key, milestones, transactionAddress:addr})
+    });
+    const d = await res.json();
+    const r = d.result;
+    const levelColor = {red:'var(--red)',amber:'var(--amber)',green:'var(--green)'}[r.alertLevel]||'var(--text2)';
+    const alertClass = {overdue:'ar-overdue',due_today:'ar-today',due_48hrs:'ar-48',due_7days:'ar-7'};
+    const alertsHtml = (r.alerts||[]).map(a=>`<div class="alert-row ${alertClass[a.urgency]||'ar-7'}">
+      <div style="font-size:18px;flex-shrink:0">${{overdue:'🔴',due_today:'🟠',due_48hrs:'🟡',due_7days:'🔵'}[a.urgency]||'⚪'}</div>
+      <div class="ar-body">
+        <div class="ar-title">${esc(a.title)}</div>
+        <div class="ar-action">→ ${esc(a.action)}</div>
+        <div class="ar-meta">Due: ${esc(a.dueDate)} · Contact: ${esc(a.contactTo||a.responsible||'—')} · If missed: ${esc(a.consequence||'Potential delay')}</div>
+      </div>
+    </div>`).join('');
+    result.innerHTML = `<div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:${levelColor}">${(r.alertLevel||'').toUpperCase()} ALERT</div>
+        <div style="font-size:13px;color:var(--text2)">${esc(r.summary||'')}</div>
+      </div>
+      ${alertsHtml}
+      ${r.onTrackSummary?`<div style="font-size:13px;color:var(--green);margin-top:14px;padding:10px;background:var(--green-dim);border-radius:var(--radius)">✓ ${esc(r.onTrackSummary)}</div>`:''}
+    </div>`;
+  } catch(e){ result.innerHTML=errCard(e.message); }
+  btn.disabled=false; btn.textContent='Generate alert report →';
+}
+
+// ── TC ASSISTANT ──
+function setQ(q) { showPage('assistant'); pg('assistant'); document.getElementById('chat-in').value=q; }
+function chatKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
+
+async function sendChat() {
+  const inp = document.getElementById('chat-in');
+  const q = inp.value.trim();
+  if(!q) return;
+  inp.value='';
+  addBubble(q,'user');
+  const typ = addTyping();
+  const btn = document.getElementById('chat-send');
+  btn.disabled=true;
+  try {
+    const res = await fetch(`${API}/api/assistant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,question:q})});
+    const d = await res.json();
+    typ.remove();
+    addBubble(d.answer,'ai');
+  } catch(e) { typ.remove(); addBubble('Error: '+e.message,'ai'); }
+  btn.disabled=false;
+  inp.focus();
+}
+
+function addBubble(text,role) {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className=`bbl bbl-${role}`;
+  div.innerHTML=`<div class="bbl-c">${esc(text)}</div><div class="bbl-m">${role==='ai'?'CloseTrack AI':'You'} · just now</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className='bbl bbl-ai';
+  div.innerHTML='<div class="bbl-c"><div class="typing"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+// ── UTILS ──
+function loading(t){return`<div class="loading-row"><div class="spinner"></div><div>${t}</div></div>`;}
+function errCard(m){return`<div class="err-row">Error: ${esc(m)}</div>`;}
+function copyEl(id){const el=document.getElementById(id);if(!el)return;navigator.clipboard.writeText(el.innerText.replace(/^Copy$/,'').trim()).then(()=>{const b=el.querySelector('.copy-btn');if(b){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000);}});}
+</script>
+</body>
+</html>
